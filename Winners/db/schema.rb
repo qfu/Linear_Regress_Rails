@@ -11,7 +11,15 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160506042149) do
+ActiveRecord::Schema.define(version: 20160513223823) do
+
+  create_table "stocastics", force: :cascade do |t|
+    t.string   "symbol"
+    t.float    "price"
+    t.string   "marketTime"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
 
   create_table "stocks", force: :cascade do |t|
     t.string   "symbol"

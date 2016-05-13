@@ -1,3 +1,4 @@
+require "http"
 class StocksController < ApplicationController
   before_action :set_stock, only: [:show, :edit, :update, :destroy]
 
@@ -26,6 +27,46 @@ class StocksController < ApplicationController
   def create
     @stock = Stock.new(stock_params)
 
+    #Create Request Address
+    external = "http://dev.markitondemand.com/MODApis/Api/v2/Quote/json?symbol="
+    external_request_address = external << stock_params["symbol"]
+
+    #Retrive from External API
+    variable = HTTP.get(external_request_address)
+    @decodedJson = ActiveSupport::JSON.decode(variable)
+
+
+    #Create Stocastic Model
+    Stocastic.create(:symbol=>@decodedJson["Symbol"],
+                      :price=>@decodedJson["LastPrice"],
+                      :marketTime=>@decodedJson["Timestamp"])
+
+=begin
+    puts @decodedJson["Symbol"]
+    puts @decodedJson["LastPrice"]
+    puts @decodedJson["Timestamp"]
+=end
+
+    # multiple request via certain intevals
+=begin
+    begin
+      # create HTTP client with persistent connection to api.icndb.com:
+      http = HTTP.persistent "http://api.icndb.com"
+
+      # issue multiple requests using same connection:
+      100.times.map {
+         jokes = http.get("/jokes/random").to_s
+         puts jokes
+         sleep 2
+         puts "it acutually sleeps"
+      }
+
+    ensure
+      # close underlying connection when you don't need it anymore
+      http.close if http
+    end
+=end
+    #Create HTTP Call
     respond_to do |format|
       if @stock.save
         format.html { redirect_to @stock, notice: 'Stock was successfully created.' }
